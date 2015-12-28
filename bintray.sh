@@ -10,13 +10,13 @@ FILE=$1
 
 [ -f "$FILE" ] || exit
 
-BINTRAY_USER="probono"
+BINTRAY_USER="boudewijnrempt"
 BINTRAY_API_KEY=$BINTRAY_API_KEY # env
 BINTRAY_REPO="AppImages"
 PCK_NAME=$(basename $1)
 WEBSITE_URL="http://appimage.org"
-ISSUE_TRACKER_URL="https://github.com/probonopd/AppImages/issues"
-VCS_URL="https://github.com/probonopd/AppImages.git" # Mandatory for packages in free Bintray repos
+ISSUE_TRACKER_URL="https://github.com/boudewijnrempt/AppImages/issues"
+VCS_URL="https://github.com/boudewijnrempt/AppImages.git" # Mandatory for packages in free Bintray repos
 
 which curl || exit 1
 which bsdtar || exit 1 # https://github.com/libarchive/libarchive/wiki/ManPageBsdtar1 ; isoinfo cannot read zisofs
@@ -150,7 +150,7 @@ if [ $(which zsyncmake) ] ; then
   echo "Uploading and publishing zsync file for ${FILE}..."
   # Workaround for:
   # https://github.com/probonopd/zsync-curl/issues/1
-  zsyncmake -u http://dl.bintray.com/probono/AppImages/$(basename ${FILE}) ${FILE} -o ${FILE}.zsync
+  zsyncmake -u http://dl.bintray.com/boudewijnrempt/AppImages/$(basename ${FILE}) ${FILE} -o ${FILE}.zsync
   ${CURL} -T ${FILE}.zsync "${API}/content/${BINTRAY_USER}/${BINTRAY_REPO}/${PCK_NAME}/${VERSION}/$(basename ${FILE}).zsync?publish=1&override=1"
 else
   echo "zsyncmake not found, skipping zsync file generation and upload"
