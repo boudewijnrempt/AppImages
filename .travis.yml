@@ -9,7 +9,7 @@ services:
 - docker
 
 env:
-#  - RECIPE=scribus
+  - RECIPE=scribus
 #  - RECIPE=subsurface
 #  - RECIPE=firefox
 #  - RECIPE=arduino
@@ -17,7 +17,7 @@ env:
 #  - RECIPE=vlc
 #  - RECIPE=leafpad
 #  - RECIPE=chromium
-  - RECIPE=krita
+#  - RECIPE=krita
 
 script:
 - bash travis.sh $RECIPE
