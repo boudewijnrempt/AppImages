@@ -73,6 +73,10 @@ mkdir d
 rm -rf /Krita.AppDir/ || true
 mkdir -p /Krita.AppDir/usr
 
+# make sure lib and lib64 are the same thing
+mkdir -p /Krita.AppDir/usr/lib
+ln -s /Krita.AppDir/usr/lib /Krita.AppDir/usr/lib64
+
 cmake ../krita/3rdparty \
     -DCMAKE_INSTALL_PREFIX:PATH=/Krita.AppDir/usr \
     -DINSTALL_ROOT=/Krita.AppDir/usr \
@@ -123,12 +127,12 @@ else
 fi
 echo $PLUGINS # /usr/lib64/qt5/plugins if build system Qt is found
 cp -r $PLUGINS/bearer ./usr/lib/qt5/plugins/
-cp -r $PLUGINS/iconengines ./usr/lib/qt5/plugins/
+cp -r $PLUGINS/generic ./usr/lib/qt5/plugins/
 cp -r $PLUGINS/imageformats ./usr/lib/qt5/plugins/
-cp -r $PLUGINS/platforminputcontexts ./usr/lib/qt5/plugins/
 cp -r $PLUGINS/platforms ./usr/lib/qt5/plugins/
+cp -r $PLUGINS/iconengines ./usr/lib/qt5/plugins/
+cp -r $PLUGINS/platforminputcontexts ./usr/lib/qt5/plugins/
 cp -r $PLUGINS/platformthemes ./usr/lib/qt5/plugins/
-cp -r $PLUGINS/sensors ./usr/lib/qt5/plugins/
 cp -r $PLUGINS/xcbglintegrations ./usr/lib/qt5/plugins/
 
 cp $(ldconfig -p | grep libsasl2.so.2 | cut -d ">" -f 2 | xargs) ./usr/lib/
@@ -144,16 +148,34 @@ cp $(ldconfig -p | grep libEGL.so.1 | cut -d ">" -f 2 | xargs) ./usr/lib/ # Othe
 cp $(ldconfig -p | grep libxcb.so.1 | cut -d ">" -f 2 | xargs) ./usr/lib/ 
 cp $(ldconfig -p | grep libfreetype.so.6 | cut -d ">" -f 2 | xargs) ./usr/lib/ # For Fedora 20
 
-ldd usr/bin/krita | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
-ldd usr/lib/scribus/plugins/*.so  | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+#ldd usr/bin/krita | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+#ldd usr/lib64/krita/*.so  | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+#ldd usr/lib64/plugins/imageformats/*.so  | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
+
 ldd usr/lib/qt5/plugins/platforms/libqxcb.so | grep "=>" | awk '{print $3}'  |  xargs -I '{}' cp -v '{}' ./usr/lib || true
+
+# Copy in the indirect dependencies
+FILES=$(find . -type f -executable)
+DEPS=""
+for FILE in $FILES ; do
+  ldd "${FILE}" | grep "=>" | awk '{print $3}' | xargs -I '{}' echo '{}' > DEPSFILE
+done
+DEPS=$(cat DEPSFILE  |sort | uniq)
+for FILE in $DEPS ; do
+  if [ -f $FILE ] ; then
+    echo $FILE
+    cp --parents -rfL $FILE ./
+  fi
+done
+rm -f DEPSFILE
+
 
 # The following are assumed to be part of the base system
 rm -f usr/lib/libcom_err.so.2 || true
 rm -f usr/lib/libcrypt.so.1 || true
 rm -f usr/lib/libdl.so.2 || true
 rm -f usr/lib/libexpat.so.1 || true
-rm -f usr/lib/libfontconfig.so.1 || true
+#rm -f usr/lib/libfontconfig.so.1 || true
 rm -f usr/lib/libgcc_s.so.1 || true
 rm -f usr/lib/libglib-2.0.so.0 || true
 rm -f usr/lib/libgpg-error.so.0 || true
@@ -184,7 +206,7 @@ rm -f usr/lib/libSM.so.6 || true
 rm -f usr/lib/libusb-1.0.so.0 || true
 rm -f usr/lib/libuuid.so.1 || true
 rm -f usr/lib/libwind.so.0 || true
-rm -f usr/lib/libz.so.1 || true
+#rm -f usr/lib/libz.so.1 || true
 
 # These seem to be available on most systems but not Ubuntu 11.04
 # rm -f usr/lib/libffi.so.6 usr/lib/libGL.so.1 usr/lib/libglapi.so.0 usr/lib/libxcb.so.1 usr/lib/libxcb-glx.so.0 || true
@@ -198,17 +220,20 @@ rm -f usr/lib/libstdc* usr/lib/libgobject* usr/lib/libc.so.* || true
 rm -rf usr/include || true
 rm -rf usr/lib/cmake || true
 rm -rf usr/lib/pkgconfig || true
+rm -rf usr/share/ECM/ || true
+rm -rf usr/share/gettext || true
+rm -rf usr/share/pkgconfig || true
 
 # don't strip -- we like debug symbols for daily builds
 #strip usr/bin/* usr/lib/* || true
 
-# Since we set /Scribus.AppDir as the prefix, we need to patch it away too (FIXME)
+# Since we set /Krita.AppDir as the prefix, we need to patch it away too (FIXME)
 # Probably it would be better to use /app as a prefix because it has the same length for all apps
-cd usr/ ; find . -type f -exec sed -i -e 's|/Krita.AppDir/usr/|././././././././././|g' {} \; ; cd ..
+cd usr/ ; find . -type f -exec sed -i -e 's|/Krita.AppDir/usr/|././././././././././|g' {} \; ; cd  ..
 
 # On openSUSE Qt is picking up the wrong libqxcb.so
 # (the one from the system when in fact it should use the bundled one) - is this a Qt bug?
-# Also, Scribus and the embedded Python have hardcoded /usr which we patch away
+# Also, Krita has a hardcoded /usr which we patch away
 cd usr/ ; find . -type f -exec sed -i -e 's|/usr|././|g' {} \; ; cd ..
 
 # We do not bundle this, so let's not search that inside the AppImage. 
@@ -226,16 +251,20 @@ sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/libQt5XcbQpa.so.5
 rm -f ./usr/lib/libdbus-1.so.3 || true
 
 cp ../AppImageKit/AppRun .
-cp ./usr/share/mimelnk/application/vnd.scribsu.desktop scribus.desktop
-cp ./usr/share/scribus/icons/1_5_0/scribus.png .
+cp ./usr/share/applications/krita.desktop krita.desktop
+cp ../krita/krita/pics/app/64-apps-calligrakrita.png .
 
 cd ..
 
-APP=Scribus
+APP=Krita
 
-VER=$(grep "#define VERSION" ./scribus1*/config.h | cut -d '"' -f 2)
-REVISION=$(svn info scribus1* |grep Revision: | cut -c11-)
-VERSION=$VER.$REVISION
+VER=$(grep "#define CALLIGRA_VERSION_STRING" krita_build/libs/version/calligraversion.h | cut -d '"' -f 2)
+cd krita
+BRANCH=$( git branch | cut -d ' ' -f 2)
+REVISION=$(git rev-parse HEAD)
+cd ..
+VERSION=$VER-$BRANCH-$REVISION
+VERSION="$(sed s/\ /-/g <<<$VERSION)"
 echo $VERSION
 
 ARCH=$(arch)
@@ -246,11 +275,12 @@ fi
 if [[ "$ARCH" = "i686" ]] ; then
 	APPIMAGE=$APP"-"$VERSION"-i386.AppImage"
 fi
+echo $APPIMAGE
 
 mkdir -p out
 
 rm -f out/*.AppImage || true
-AppImageKit/AppImageAssistant.AppDir/package Scribus.AppDir/ out/$APPIMAGE
+AppImageKit/AppImageAssistant.AppDir/package Krita.AppDir/ out/$APPIMAGE
 
 chmod a+rwx out/$APPIMAGE # So that we can edit the AppImage outside of the Docker container
 
