@@ -28,7 +28,7 @@ git_pull_rebase_helper()
 
 if [ -z "$NO_DOWNLOAD" ] ; then
 yum -y install epel-release 
-yum -y install wget tar bzip2 git libtool which fuse fuse-devel subversion automake libtool mesa-libEGL cppunit-devel cmake qt5-qtbase-gui qt5-qtbase qt5-qtbase-devel qt5-qtdeclarative qt5-qtdeclarative-devel qt5-qttools qt5-qttools-devel qt5-qtwebkit qt5-qtwebkit-devel qt5-qtbase-static glibc-headers libstdc++-devel gcc-c++ freetype-devel cairo-devel lcms2-devel libpng-devel libjpeg-devel libtiff-devel python-devel aspell-devel boost-devel cups-devel libxml2-devel libstdc++-devel boost-devel-static gperf libicu-devel tkinter
+yum -y install wget tar bzip2 git libtool which fuse fuse-devel subversion automake libtool mesa-libEGL cppunit-devel cmake qt5-qtbase-gui qt5-qtbase qt5-qtbase-devel qt5-qtdeclarative qt5-qtdeclarative-devel qt5-qttools qt5-qttools-devel qt5-qtscript-devel glibc-headers libstdc++-devel gcc-c++ freetype-devel fontconfig-devel libxml2-devel libstdc++-devel patch
 
 # Newer compiler than what comes with CentOS 6
 wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
@@ -50,24 +50,6 @@ fi
 # Use the new compiler
 . /opt/rh/devtoolset-2/enable
 
-if [ -z "$NO_DOWNLOAD" ] ; then
-# http://wiki.scribus.net/canvas/Librevenge
-# For those who always build the latest 1.5.0svn from source for testing, 
-# some new dependencies have been introduced to get the full functionality of 1.5.0.
-# These are coming from http://www.documentliberation.org
-# irc #documentliberation-dev
-
-if [ -z "$NO_LIBS" ] ; then
-
-# Upgrade autoconf to 2.65 for librevenge-0.0.1
-  wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.65.tar.bz2
-  tar xf autoconf-2.65.tar.bz2 
-  cd autoconf-*
-  ./configure --prefix=/usr
-  make
-  make install
-  cd -
-fi
 
 # Workaround for: On CentOS 6, .pc files in /usr/lib/pkgconfig are not recognized
 # However, this is where .pc files get installed when bulding libraries... (FIXME)
@@ -75,145 +57,53 @@ fi
 # between Ubuntu and CentOS 6
 ln -sf /usr/share/pkgconfig /usr/lib/pkgconfig
 
-if [ ! -d librevenge ] ; then
-  git clone git://git.code.sf.net/p/libwpd/librevenge librevenge
-fi
-cd librevenge*
-git_pull_rebase_helper
-./autogen.sh
-./configure --prefix=/usr
-make
-make install
-cd ..
 
-ldconfig
-
-
-if [ ! -d libmspub ] ; then
-  git clone http://anongit.freedesktop.org/git/libreoffice/libmspub.git
-fi
-cd libmspub/
-./autogen.sh
-./configure --prefix=/usr
-make
-make install
-cd -
-
-if [ ! -d libvisio ] ; then
-  git clone http://anongit.freedesktop.org/git/libreoffice/libvisio.git
-fi
-cd libvisio/
-git_pull_rebase_helper
-# git checkout 9593bbf3b9ea47ccc864536c94f154ce68bad22f # last good as of today?
-./autogen.sh
-./configure --prefix=/usr
-# Workaround for:
-# VSDXMLTokenMap.h:14:20: error: tokens.h: No such file or directory
-perl ./src/lib/gentoken.pl src/lib/tokens.txt src/lib/tokens.h src/lib/tokens.gperf
-gperf  --compare-strncmp -C -m 20 src/lib/tokens.gperf | sed -e 's/(char\*)0/(char\*)0, 0/g' > src/lib/tokenhash.h
-# Workaround for:
-#  CXX    libvisio_0_1_la-libvisio_xml.lo
-# libvisio_xml.cpp: In function 'int libvisio::{anonymous}::vsdxInputReadFunc(void*, char*, int)':
-# libvisio_xml.cpp:45:48: error: 'memcpy' was not declared in this scope
-#        memcpy(buffer, tmpBuffer, tmpNumBytesRead);
-sed -i -e 's|#include "libvisio_xml.h"|#include "libvisio_xml.h"\n#include <string.h>|g'  ./src/lib/libvisio_xml.cpp
-make
-make install
-cd -
-
-if [ ! -d libcdr ] ; then
-  git clone http://anongit.freedesktop.org/git/libreoffice/libcdr.git
-fi
-cd libcdr/
-git_pull_rebase_helper
-./autogen.sh
-./configure --prefix=/usr
-make
-make install
-cd -
-
-# yaml is needed for libpagemaker
-if [ ! -d yaml-0.1.4 ] ; then
-  wget -c http://pyyaml.org/download/libyaml/yaml-0.1.4.tar.gz
-  tar -xvzf yaml-0.1.4.tar.gz
-fi
-cd yaml-0.1.4
-./configure --prefix=/usr
-make
-make install
-cd -
-
-if [ ! -d libpagemaker ] ; then
-  git clone https://github.com/umanwizard/libpagemaker.git
-fi
-cd libpagemaker/
-git_pull_rebase_helper
-./autogen.sh
-./configure --prefix=/usr
-make
-make install
-cd -
-
-# Workaround for:
-# In file included from /scribus15/scribus/third_party/zip/zip.cpp:29:0:
-# /scribus15/scribus/third_party/zip/zip_p.h:65:10: error: 'z_crc_t' does not name a type
-#   typedef z_crc_t crc_t;
-if [ ! -d zlib-1.2.8 ] ; then
-  wget http://zlib.net/zlib-1.2.8.tar.gz
-  tar xf zlib-1.2.8.tar.gz
-fi
-cd zlib-*
-./configure --prefix=/usr
-make
-make install
-cd -
-
-# Workaround for missing "/usr/lib64/lib64/libboost_date_time.a"
-if [ ! -e /usr/lib64/lib64 ] ; then
-  ls /usr/lib64/lib64 2>/dev/null || ln -sf /usr/lib64/ /usr/lib64/lib64
-fi
-
-# Workaround for missing "/usr/lib64/lib64/libboost_date_time-d.a"
-# http://comments.gmane.org/gmane.comp.mobile.osmocom.sdr/1097
-rpm -ql boost-devel | grep 'cmake$' | xargs rm || true
-
-# Workaround for:
-# -- checking for one of the modules 'libcairo>=1.10.0;cairo>=1.10.0'
-# CMake Error at /usr/share/cmake/Modules/FindPkgConfig.cmake:363 (message):
-#   None of the required 'libcairo>=1.10.0;cairo>=1.10.0' found
 if [ -z "$NO_DOWNLOAD" ] ; then
-  rpm -ivh --force ftp://ftp.pbone.net/mirror/ftp.sourceforge.net/pub/sourceforge/f/fu/fuduntu-el/el6/current/TESTING/RPMS/cairo-1.10.2-3.el6.$(arch).rpm
-  rpm -ivh --force ftp://ftp.pbone.net/mirror/ftp.sourceforge.net/pub/sourceforge/f/fu/fuduntu-el/el6/current/TESTING/RPMS/cairo-devel-1.10.2-3.el6.$(arch).rpm
-fi
 
-fi # if [ -z "$NO_LIBS" ]
+# Get Krita
+git clone https://github.com/KDE/krita.git
 
-svn co svn://scribus.net/trunk/Scribus scribus15
-# svn co -r 20099 svn://scribus.net/trunk/Scribus scribus150
+# Create the build dir for the 3rdparty deps
+mkdir b
+cd b
+mkdir d
 
-# Workaround for:
-# When cmake oes not find the libraries we compiled above
-# pkg-config --list-all
-# Package 'icu-i18n', required by 'libvisio-0.1', not found
-sed -i -e 's|icu-i18n|icu|g' /usr/lib/pkgconfig/libcdr-0.1.pc 
-sed -i -e 's|icu-i18n|icu|g' /usr/lib/pkgconfig/libmspub-0.1.pc 
-sed -i -e 's|icu-i18n|icu|g' /usr/lib/pkgconfig/libvisio-0.1.pc 
+# Prepare the install location
+rm -rf /Krita.AppDir/ || true
+mkdir -p /Krita.AppDir/usr
 
-# Workaround for:
-# ld: cannot find -lpmd-0.0
-cp /usr/lib/libpagemaker-0.0.so /usr/lib/libpmd-0.0.so
-
-cd scribus1*
-
-ldconfig
-
-rm -rf /Scribus.AppDir/ || true
-mkdir -p /Scribus.AppDir/usr
-
-cmake -DWANT_SVNVERSION=1 -DCMAKE_INSTALL_PREFIX:PATH=/Scribus.AppDir/usr .
-
-make
-
+cmake ../krita/3rdparty \
+    -DCMAKE_INSTALL_PREFIX:PATH=/Krita.AppDir/usr \
+    -DINSTALL_ROOT=/Krita.AppDir/usr \
+    -DEXTERNALS_DOWNLOAD_DIR=d
+    
+cmake --build . --config RelWithDebInfo --target ext_boost
+cmake --build . --config RelWithDebInfo --target ext_eigen3
+cmake --build . --config RelWithDebInfo --target ext_exiv2
+cmake --build . --config RelWithDebInfo --target ext_fftw3
+cmake --build . --config RelWithDebInfo --target ext_lcms2
+cmake --build . --config RelWithDebInfo --target ext_ocio
+cmake --build . --config RelWithDebInfo --target ext_openexr
+cmake --build . --config RelWithDebInfo --target ext_vc
+cmake --build . --config RelWithDebInfo --target ext_png
+cmake --build . --config RelWithDebInfo --target ext_libraw
+cmake --build . --config RelWithDebInfo --target ext_openjpeg
+cmake --build . --config RelWithDebInfo --target ext_kcrash
+cmake --build . --config RelWithDebInfo --target ext_poppler
+    
+cd ..
+mkdir krita_build
+cd krita_build
+cmake ../krita \
+    -DCMAKE_INSTALL_PREFIX:PATH=/Krita.AppDir/usr \
+    -DDEFINE_NO_DEPRECATED=1 \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DPACKAGERS_BUILD=1 \
+    -DBUILD_TESTING=FALSE \
+    -DKDE4_BUILD_TESTS=FALSE \
+    -DHAVE_MEMORY_LEAK_TRACKER=FALSE
+    
+    
 # Install into the AppDir
 make install
 
