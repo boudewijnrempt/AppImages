@@ -1,4 +1,4 @@
-#!/bin/bash
+    #!/bin/bash
 
 # Enter a CentOS 6 chroot (you could use other methods)
 # git clone https://github.com/probonopd/AppImageKit.git
@@ -225,7 +225,7 @@ rm -rf usr/share/gettext || true
 rm -rf usr/share/pkgconfig || true
 
 # don't strip -- we like debug symbols for daily builds
-#strip usr/bin/* usr/lib/* || true
+strip usr/bin/* usr/lib64/* usr/lib/* || true
 
 # Since we set /Krita.AppDir as the prefix, we need to patch it away too (FIXME)
 # Probably it would be better to use /app as a prefix because it has the same length for all apps
@@ -252,7 +252,7 @@ rm -f ./usr/lib/libdbus-1.so.3 || true
 
 cp ../AppImageKit/AppRun .
 cp ./usr/share/applications/krita.desktop krita.desktop
-cp ../krita/krita/pics/app/64-apps-calligrakrita.png .
+cp ../krita/krita/pics/app/64-apps-calligrakrita.png . calligrakrita.png
 
 cd ..
 
