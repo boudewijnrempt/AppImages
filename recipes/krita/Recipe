@@ -1,4 +1,4 @@
-    #!/bin/bash
+#!/bin/bash
 
 # Enter a CentOS 6 chroot (you could use other methods)
 # git clone https://github.com/probonopd/AppImageKit.git
@@ -42,12 +42,12 @@ cd  /
 
 # Build AppImageKit
 if [ ! -d AppImageKit ] ; then
-  git clone https://github.com/probonopd/AppImageKit.git
+  git clone https://github.com/probonopd/AppImageKit.git /AppImageKit
 fi
-cd AppImageKit/
+cd /AppImageKit/
 git_pull_rebase_helper
 ./build.sh
-cd ..
+cd /
 fi
 
 
@@ -72,25 +72,29 @@ if [ -z "$NO_DOWNLOAD" ] ; then
 # d -- downloads of the dependencies from files.kde.org
 # b -- build directory for the dependencies
 # krita_build -- build directory for krita itself
-# Krita.AppDir -- install directory for krita and the dependencies
+# krita.appdir -- install directory for krita and the dependencies
 
 # Get Krita
-git clone https://github.com/KDE/krita.git
+if [ ! -d /krita ] ; then
+	git clone https://github.com/KDE/krita.git /krita
+fi
+cd /krita/
+git_pull_rebase_helper
 
 # Create the build dir for the 3rdparty deps
-mkdir b
-cd b
-mkdir d
+mkdir /b
+cd /b
+mkdir /d
 
 # Prepare the install location
-rm -rf /Krita.AppDir/ || true
-mkdir -p /Krita.AppDir/usr
+rm -rf /krita.appdir/ || true
+mkdir -p /krita.appdir/usr
 
 # make sure lib and lib64 are the same thing
-mkdir -p /Krita.AppDir/usr/lib
-ln -s /Krita.AppDir/usr/lib /Krita.AppDir/usr/lib64
+mkdir -p /krita.appdir/usr/lib
+ln -s /krita.appdir/usr/lib /krita.appdir/usr/lib64
 
-cmake ../krita/3rdparty \
+cmake /krita/3rdparty \
     -DCMAKE_INSTALL_PREFIX:PATH=/usr \
     -DINSTALL_ROOT=/usr \
     -DEXTERNALS_DOWNLOAD_DIR=d
@@ -114,10 +118,10 @@ cmake --build . --config RelWithDebInfo --target ext_poppler
 cmake --build . --config RelWithDebInfo --target ext_gsl
     
 cd ..
-mkdir krita_build
-cd krita_build
+mkdir /krita_build
+cd /krita_build
 cmake ../krita \
-    -DCMAKE_INSTALL_PREFIX:PATH=/Krita.AppDir/usr \
+    -DCMAKE_INSTALL_PREFIX:PATH=/krita.appdir/usr \
     -DDEFINE_NO_DEPRECATED=1 \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DPACKAGERS_BUILD=1 \
@@ -128,7 +132,7 @@ cmake ../krita \
 # Install into the AppDir
 make -j4 install
 
-cd /Krita.AppDir
+cd /krita.appdir
 
 # FIXME: How to find out which subset of plugins is really needed? I used strace when running the binary
 mkdir -p ./usr/lib/qt5/plugins/
@@ -240,9 +244,9 @@ rm -rf usr/share/pkgconfig || true
 # don't strip -- we like debug symbols for daily builds
 strip usr/bin/* usr/lib64/* usr/lib/* || true
 
-# Since we set /Krita.AppDir as the prefix, we need to patch it away too (FIXME)
+# Since we set /krita.appdir as the prefix, we need to patch it away too (FIXME)
 # Probably it would be better to use /app as a prefix because it has the same length for all apps
-cd usr/ ; find . -type f -exec sed -i -e 's|/Krita.AppDir/usr/|./././././././././|g' {} \; ; cd  ..
+cd usr/ ; find . -type f -exec sed -i -e 's|/krita.appdir/usr/|./././././././././|g' {} \; ; cd  ..
 
 # On openSUSE Qt is picking up the wrong libqxcb.so
 # (the one from the system when in fact it should use the bundled one) - is this a Qt bug?
@@ -265,9 +269,9 @@ rm -f ./usr/lib/libdbus-1.so.3 || true
 
 cp ../AppImageKit/AppRun .
 cp ./usr/share/applications/krita.desktop krita.desktop
-cp ../krita/krita/pics/app/64-apps-calligrakrita.png . calligrakrita.png
+cp /krita/krita/pics/app/64-apps-calligrakrita.png calligrakrita.png
 
-cd ..
+cd / 
 
 APP=Krita
 
@@ -290,12 +294,12 @@ if [[ "$ARCH" = "i686" ]] ; then
 fi
 echo $APPIMAGE
 
-mkdir -p out
+mkdir -p /out
 
-rm -f out/*.AppImage || true
-AppImageKit/AppImageAssistant.AppDir/package Krita.AppDir/ out/$APPIMAGE
+rm -f /out/*.AppImage || true
+AppImageKit/AppImageAssistant.AppDir/package /krita.appdir/ /out/$APPIMAGE
 
-chmod a+rwx out/$APPIMAGE # So that we can edit the AppImage outside of the Docker container
+chmod a+rwx /out/$APPIMAGE # So that we can edit the AppImage outside of the Docker container
 
 # Test the resulting AppImage on my local system
 # sudo /tmp/*/union/AppImageKit/AppImageAssistant.AppDir/testappimage /isodevice/boot/iso/Fedora-Live-Workstation-x86_64-22-3.iso /tmp/*/union/Scribus.AppDir/
