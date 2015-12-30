@@ -283,7 +283,7 @@ APP=Krita
 VER=$(grep "#define CALLIGRA_VERSION_STRING" krita_build/libs/version/calligraversion.h | cut -d '"' -f 2)
 cd krita
 BRANCH=$( git branch | cut -d ' ' -f 2)
-REVISION=$(git rev-parse HEAD)
+REVISION=$(git rev-parse --short HEAD)
 cd ..
 VERSION=$VER-$BRANCH-$REVISION
 VERSION="$(sed s/\ /-/g <<<$VERSION)"
