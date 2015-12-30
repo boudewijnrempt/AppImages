@@ -64,8 +64,6 @@ fi
 ln -sf /usr/share/pkgconfig /usr/lib/pkgconfig
 
 
-if [ -z "$NO_DOWNLOAD" ] ; then
-
 # A krita build layout looks like this:
 # krita/ -- the source directory
 # krita/3rdparty -- the cmake definitions for the dependencies
@@ -78,6 +76,7 @@ if [ -z "$NO_DOWNLOAD" ] ; then
 if [ ! -d /krita ] ; then
 	git clone https://github.com/KDE/krita.git /krita
 fi
+
 cd /krita/
 git_pull_rebase_helper
 
