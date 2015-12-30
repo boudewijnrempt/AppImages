@@ -96,7 +96,7 @@ ln -s /krita.appdir/usr/lib /krita.appdir/usr/lib64
 cmake /krita/3rdparty \
     -DCMAKE_INSTALL_PREFIX:PATH=/usr \
     -DINSTALL_ROOT=/usr \
-    -DEXTERNALS_DOWNLOAD_DIR=d
+    -DEXTERNALS_DOWNLOAD_DIR=/d
     
 cmake --build . --config RelWithDebInfo --target ext_boost
 cmake --build . --config RelWithDebInfo --target ext_eigen3
