@@ -37,6 +37,9 @@ yum -y install wget tar bzip2 git libtool which fuse fuse-devel automake libtool
 wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
 yum -y install devtoolset-2-gcc devtoolset-2-gcc-c++ devtoolset-2-binutils
 
+# Make sure we build from the /, parts of this script depends on that. We also need to run as root...
+cd  /
+
 # Build AppImageKit
 if [ ! -d AppImageKit ] ; then
   git clone https://github.com/probonopd/AppImageKit.git
