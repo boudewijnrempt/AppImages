@@ -174,22 +174,15 @@ cp $(ldconfig -p | grep libfreetype.so.6 | cut -d ">" -f 2 | xargs) ./usr/lib/ #
 #ldd usr/lib64/krita/*.so  | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 #ldd usr/lib64/plugins/imageformats/*.so  | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' ./usr/lib || true
 
+export LD_LIBRARY_PATH=/usr/lib64/:/usr/lib:/krita.appdir/usr/lib
+
 ldd usr/lib/qt5/plugins/platforms/libqxcb.so | grep "=>" | awk '{print $3}'  |  xargs -I '{}' cp -v '{}' ./usr/lib || true
 
 # Copy in the indirect dependencies
 FILES=$(find . -type f -executable)
-DEPS=""
 for FILE in $FILES ; do
-  ldd "${FILE}" | grep "=>" | awk '{print $3}' | xargs -I '{}' echo '{}' > DEPSFILE
+  ldd "${FILE}" | grep "=>" | awk '{print $3}' | xargs -I '{}' cp -v '{}' usr/lib || true
 done
-DEPS=$(cat DEPSFILE  |sort | uniq)
-for FILE in $DEPS ; do
-  if [ -f $FILE ] ; then
-    echo $FILE
-    cp --parents -rfL $FILE ./
-  fi
-done
-rm -f DEPSFILE
 
 
 # The following are assumed to be part of the base system
