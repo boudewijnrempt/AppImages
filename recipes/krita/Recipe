@@ -81,9 +81,15 @@ cd /krita/
 git_pull_rebase_helper
 
 # Create the build dir for the 3rdparty deps
-mkdir /b
+if [ ! -d /b ]
+    mkdir /b
+fi    
+if [ ! -d /d ]
+    mkdir /d
+fi
+
 cd /b
-mkdir /d
+rm -rf /b/* || true
 
 # Prepare the install location
 rm -rf /krita.appdir/ || true
