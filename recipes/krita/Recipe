@@ -29,7 +29,7 @@ git_pull_rebase_helper()
 	fi
 }
 
-if [ -z "$NO_DOWNLOAD" ] ; then
+#if [ -z "$NO_DOWNLOAD" ] ; then
 yum -y install epel-release 
 # we need to be up to date in order to install the xcb-keysyms dependency
 yum -y update
@@ -47,11 +47,12 @@ cd  /
 if [ ! -d AppImageKit ] ; then
   git clone https://github.com/probonopd/AppImageKit.git /AppImageKit
 fi
+
 cd /AppImageKit/
 git_pull_rebase_helper
 ./build.sh
 cd /
-fi
+#fi
 
 
 # Workaround for:
@@ -84,10 +85,10 @@ cd /krita/
 git_pull_rebase_helper
 
 # Create the build dir for the 3rdparty deps
-if [ ! -d /b ]
+if [ ! -d /b ] then
     mkdir /b
 fi    
-if [ ! -d /d ]
+if [ ! -d /d ] then
     mkdir /d
 fi
 
