@@ -241,7 +241,7 @@ rm -rf usr/share/ECM/ || true
 rm -rf usr/share/gettext || true
 rm -rf usr/share/pkgconfig || true
 
-strip usr/lib/krita/* usr/bin/* usr/lib/* || true
+strip usr/lib/kritaplugins/* usr/bin/* usr/lib/* || true
 
 # Since we set /krita.appdir as the prefix, we need to patch it away too (FIXME)
 # Probably it would be better to use /app as a prefix because it has the same length for all apps
