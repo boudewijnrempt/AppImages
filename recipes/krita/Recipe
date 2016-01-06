@@ -99,16 +99,18 @@ if [ ! -d /d ] ; then
     mkdir /d
 fi
 
-cd /b
-rm -rf /b/* || true
-
 # Prepare the install location
 rm -rf /krita.appdir/ || true
 mkdir -p /krita.appdir/usr
 
 # make sure lib and lib64 are the same thing
 mkdir -p /krita.appdir/usr/lib
-ln -s /krita.appdir/usr/lib /krita.appdir/usr/lib64
+cd  /krita.appdir/usr
+ln -s lib lib64
+
+# start building the deps
+cd /b
+rm -rf /b/* || true
 
 cmake /krita/3rdparty \
     -DCMAKE_INSTALL_PREFIX:PATH=/usr \
@@ -278,7 +280,10 @@ cd usr/ ; find . -type f -exec sed -i -e 's|/usr|././|g' {} \; ; cd ..
 # Fixes "Qt: Failed to create XKB context!" and lets us enter text
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/qt5/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/libQt5XcbQpa.so.5
+sed -i -e 's|/usr/lib64/dri|././/lib64/dri|g' ./usr/lib/libGL.so.1
 
+mkdir -p usr/lib64/dri
+cp /usr/lib/x86_64-linux-gnu/dri/* usr/lib/dri/
 
 # Workaround for:
 # D-Bus library appears to be incorrectly set up;
