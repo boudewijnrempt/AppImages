@@ -247,6 +247,13 @@ rm -f usr/lib/libSM.so.6 || true
 rm -f usr/lib/libusb-1.0.so.0 || true
 rm -f usr/lib/libuuid.so.1 || true
 rm -f usr/lib/libwind.so.0 || true
+
+# Remove these libraries, we need to use the system versions
+rm -f usr/lib/libGL.so.* || true
+rm -f usr/lib/libDRM.so.* || true
+rm -f usr/lib/libxcb.so.* || true
+rm -f usr/lib/libX11.so.* || true
+
 #rm -f usr/lib/libz.so.1 || true
 
 # These seem to be available on most systems but not Ubuntu 11.04
@@ -280,10 +287,6 @@ cd usr/ ; find . -type f -exec sed -i -e 's|/usr|././|g' {} \; ; cd ..
 # Fixes "Qt: Failed to create XKB context!" and lets us enter text
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/qt5/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/libQt5XcbQpa.so.5
-sed -i -e 's|/usr/lib64/dri|././/lib64/dri|g' ./usr/lib/libGL.so.1
-
-mkdir -p /krita.app/usr/lib64/dri
-cp /usr/lib64/dri/* /krita.app/usr/lib/dri/
 
 # Workaround for:
 # D-Bus library appears to be incorrectly set up;
