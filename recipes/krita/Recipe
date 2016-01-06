@@ -282,8 +282,8 @@ sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/qt5/plugins/platformin
 sed -i -e 's|././/share/X11/|/usr/share/X11/|g' ./usr/lib/libQt5XcbQpa.so.5
 sed -i -e 's|/usr/lib64/dri|././/lib64/dri|g' ./usr/lib/libGL.so.1
 
-mkdir -p usr/lib64/dri
-cp /usr/lib/x86_64-linux-gnu/dri/* usr/lib/dri/
+mkdir -p /krita.app/usr/lib64/dri
+cp /usr/lib64/dri/* /krita.app/usr/lib/dri/
 
 # Workaround for:
 # D-Bus library appears to be incorrectly set up;
