@@ -300,14 +300,13 @@ cp /krita/krita/pics/app/64-apps-calligrakrita.png calligrakrita.png
 
 
 # replace krita with the lib-checking startup script.
-cd /krita.app/usr/bin
+cd /krita.appdir/usr/bin
 mv krita krita.real
 wget https://raw.githubusercontent.com/boudewijnrempt/AppImages/master/recipes/krita/krita
 
-
 cd / 
 
-APP=Krita
+APP=krita
 
 VER=$(grep "#define CALLIGRA_VERSION_STRING" krita_build/libs/version/calligraversion.h | cut -d '"' -f 2)
 cd krita
@@ -319,10 +318,10 @@ VERSION="$(sed s/\ /-/g <<<$VERSION)"
 echo $VERSION
 
 if [[ "$ARCH" = "x86_64" ]] ; then
-	APPIMAGE=$APP"-"$VERSION"-x86_64.AppImage"
+	APPIMAGE=$APP"-"$VERSION"-x86_64.appimage"
 fi
 if [[ "$ARCH" = "i686" ]] ; then
-	APPIMAGE=$APP"-"$VERSION"-i386.AppImage"
+	APPIMAGE=$APP"-"$VERSION"-i386.appimage"
 fi
 echo $APPIMAGE
 
