@@ -52,7 +52,7 @@ cd  /
 
 # Build AppImageKit
 if [ ! -d AppImageKit ] ; then
-  git clone https://github.com/probonopd/AppImageKit.git /AppImageKit
+  git clone  --depth 1 https://github.com/probonopd/AppImageKit.git /AppImageKit
 fi
 
 cd /AppImageKit/
@@ -85,7 +85,7 @@ ln -sf /usr/share/pkgconfig /usr/lib/pkgconfig
 
 # Get Krita
 if [ ! -d /krita ] ; then
-	git clone https://github.com/KDE/krita.git /krita
+	git clone  --depth 1 https://github.com/KDE/krita.git /krita
 fi
 
 cd /krita/
