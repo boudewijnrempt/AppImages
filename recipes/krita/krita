@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Wrapper to override certain libraries that are bundled with
+# the application and use the host system's libraries instead
+# if they are newer than what is provided in the AppImage.
+# Please file an issue on https://github.com/probonopd/AppImages
+# if you know a better way to achieve this.
+
+# Function to compare version numbers
+# http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
+function ver { 
+  printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' '\n' | head -n 4) 
+}
+
+# Function to decide whether the bundled or the system-provided version
+# of a library should be used. This currently relies on the version encoded
+# in the host system's symlink to the library; a more robust method would
+# be preferred
+function decide
+{ 
+HOSTLIB=""
+HOSTVERSION="0.0.0"
+HOSTLIB=$(ldconfig -p | grep $1 | cut -d ">" -f 2 | xargs)
+if [ -e $HOSTLIB ] ; then
+ HOSTVERSION=$(ls -l $HOSTLIB | awk '{print $NF}' | sed -e "s|$1.||g" )
+ echo $HOSTVERSION
+ if [ $(ver "$HOSTVERSION") -lt $(ver "$2") ] ; then
+  echo "Host $1 is older than AppImage $1,"
+  echo "hence using bundled version"
+ else
+  echo "Host $1 is not older than AppImage $1,"
+  echo "hence not using bundled version"
+  PRELOAD=$HOSTLIB:$PRELOAD
+ fi
+fi
+}
+
+# Workaround for Fedora 23:
+# symbol lookup error: /lib64/libxcb-dri3.so.0: undefined symbol: xcb_send_fd
+decide libxcb.so.1 0.99
+# Explanation: Some systems probably do not come with a recent enough libxcb.so.1.1.0
+# so we bundle it in the AppImage. However, on systems that are very new the bundled
+# libxcb.so.1.1.0 does not have all the symbols that are needed by the system-provided
+# libxcb-dri3.so.0, so we LD_PRELOAD the system-provided libxcb.so.1.1.0 if it is newer
+# than the bundled one to make sure that the system-provided one wins over the bundled one
+
+# Workaround for Fedora 23:
+# symbol lookup error: ./lib/libX11.so.6: undefined symbol: xcb_wait_for_reply64
+decide libX11.so.6 2.99
+# Explanation: Some systems probably do not come with a recent enough libX11.so.6
+# so we bundle it in the AppImage. However, on systems that are very new the bundled
+# libX11.so.6 does not have all the symbols that are needed by system-provided,
+# libraries, so we use LD_PRELOAD the system-provided libX11.so.6 if it is newer
+# than the bundled one to make sure that the system-provided one wins over the bundled one
+
+export LD_PRELOAD=$PRELOAD:$LD_PRELOAD
+exec $0.real "$@"
