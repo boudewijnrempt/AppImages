@@ -303,7 +303,7 @@ cp /krita/krita/pics/app/64-apps-calligrakrita.png calligrakrita.png
 cd /krita.appdir/usr/bin
 mv krita krita.real
 wget https://raw.githubusercontent.com/boudewijnrempt/AppImages/master/recipes/krita/krita
-
+chmod a+rx krita
 cd / 
 
 APP=krita
