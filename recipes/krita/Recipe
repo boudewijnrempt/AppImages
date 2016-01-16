@@ -332,5 +332,11 @@ AppImageKit/AppImageAssistant.AppDir/package /krita.appdir/ /out/$APPIMAGE
 
 chmod a+rwx /out/$APPIMAGE # So that we can edit the AppImage outside of the Docker container
 
+# make the zipfile version
+mv /krita.appdir/AppRun /krita.appdir/krita
+cd /
+chmod aX+ /krita.appdir/krita
+zip -r out/$APP"-"$VERSION"-x86_64.zip krita.appdir
+
 # Test the resulting AppImage on my local system
 # sudo /tmp/*/union/AppImageKit/AppImageAssistant.AppDir/testappimage /isodevice/boot/iso/Fedora-Live-Workstation-x86_64-22-3.iso /tmp/*/union/Scribus.AppDir/
