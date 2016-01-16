@@ -54,4 +54,4 @@ decide libX11.so.6 2.99
 # than the bundled one to make sure that the system-provided one wins over the bundled one
 
 export LD_PRELOAD=$PRELOAD:$LD_PRELOAD
-exec $0.real "$@"
+exec $0.real "$@" &>/dev/null
