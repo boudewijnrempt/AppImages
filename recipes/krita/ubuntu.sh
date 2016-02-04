@@ -15,7 +15,7 @@ tar -xvf qt-everywhere-opensource-src-5.6.0-beta.tar.gz -C $INSTALL_ROOT
  
 cd qt-everywhere-opensource-src-5.6.0-beta
     
-sudo apt-get -y build-dep qt5-defauklt
+sudo apt-get -y build-dep qt5-default
 #sudo apt-get install libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync1 libxcb-sync-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-glx0-dev
  
 ./configure -prefix $INSTALL_ROOT/i \
