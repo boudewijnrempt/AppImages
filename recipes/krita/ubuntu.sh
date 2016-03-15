@@ -39,7 +39,7 @@ sudo apt-get -y build-dep qt5-default
     -opensource -confirm-license \
     -qt-xkbcommon-x11 -qt-xcb -xcb-xlib
 
-make
+make -j4
 
 cd qtbase
 $INSTALL_ROOT/i/bin/qmake
