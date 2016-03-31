@@ -117,6 +117,7 @@ cmake /krita/3rdparty \
     -DINSTALL_ROOT=/usr \
     -DEXTERNALS_DOWNLOAD_DIR=/d
     
+cmake --build . --config Release --target ext_qt
 cmake --build . --config Release --target ext_boost
 cmake --build . --config Release --target ext_eigen3
 cmake --build . --config Release --target ext_exiv2
@@ -131,7 +132,6 @@ cmake --build . --config Release --target ext_jpeg
 cmake --build . --config Release --target ext_libraw
 # XXX: this builds, but cmake never manages to find the library
 #cmake --build . --config Release --target ext_openjpeg
-cmake --build . --config Release --target ext_qt
 cmake --build . --config Release --target ext_kcrash
 # XXX: this builds, but pulls in ext_png, which leads to big conflicts
 #cmake --build . --config Release --target ext_poppler
